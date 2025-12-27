@@ -128,7 +128,33 @@ function SearchResults({ songs, onPlay, onOrder }) {
   );
 }
 
-
+function RecommendedList({ songs, onOrder, onPlay }) {
+  return (
+    <div className="mt-6">
+      <h3 className="px-5 text-lg font-semibold">Recommend for you</h3>
+      {/* box songs */}
+      <div className="mt-3 ml-2 pr-16 flex flex-col gap-3">
+        {songs.map((s) => (
+          <motion.div
+            key={s._id}
+            whileHover={{ scale: 1.01 }}
+            className="rounded-2xl bg-brand-card/60 glass p-1 flex items-center gap-3"
+          >
+            <img src={s.coverImage} className="w-12 h-12 rounded-xl object-cover" alt="cover" onClick={() => onPlay(s)}/>
+            <div className="flex-1 min-w-0" onClick={() => onPlay(s)}>
+              <p className="text-sm font-medium truncate">{s.title}</p>
+              <p className="text-xs text-white/60 truncate">{s.artist}</p>
+              <p className="text-[11px] text-white/40">{Intl.NumberFormat().format(s.playCount || 0)} / plays</p>
+            </div>
+            <button onClick={() => onOrder(s)} className="px-3 py-2 pr-36 rounded-lg bg-[#6b5cffd]/20 text-violet-300 hover:bg-[#6b5cff]/30 hover:shadow-glow transition text-xs">
+              Order Song
+            </button>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 function BottomNav() {
   const items = [
@@ -175,6 +201,11 @@ export default function App() {
   const [recent, setRecent] = useState([])
   const [recommended, setRecommended] = useState([])
   const [query, setQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([]);
+  const [user, setUser] = useState({ name: 'Guest', membershipType: 'Gold', avatar: 'https://i.pravatar.cc/60?img=5', _id: '66c30d17231e48ba9d95a2e2' })
+  const [toast, setToast] = useState('')
+  const [isSearching, setIsSearching] = useState(false);
+  const [currentSong, setCurrentSong] = useState(null);
 
   useEffect(() => {
     if (query) {
@@ -183,7 +214,8 @@ export default function App() {
       }, 300); // 300ms debounce
       return () => clearTimeout(searchTimeout);
     } else {
-
+      setIsSearching(false);
+      setSearchResults([]);
     }
   }, [query]);
 
@@ -201,7 +233,8 @@ export default function App() {
 
   async function handleSearch() {
     if (!query) {
-
+      setSearchResults([]);
+      setIsSearching(false);
       return;
     }
     setIsSearching(true);
