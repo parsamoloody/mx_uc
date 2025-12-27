@@ -77,6 +77,26 @@ function SearchBar({ value, onChange, onSearch }) {
   )
 }
 
+function RecentlyPlayed({ songs, onPlay }) {
+  return (
+    <div className="mt-7">
+      <h3 className="px-5 text-lg font-semibold">Recently Played</h3>
+      <div className="mt-3 px-5 overflow-x-auto">
+        <div className="flex gap-4 min-w-max">
+          {songs.map((s) => (
+            <motion.div key={s._id} whileHover={{ y: -4 }} className="w-28 shrink-0" onClick={() => onPlay(s)}>
+              <div className="w-28 h-28 rounded-xl overflow-hidden shadow-soft">
+                <img src={s.coverImage} alt={s.title} className="w-full h-full object-cover"/>
+              </div>
+              <p className="mt-2 text-xs text-white/90 line-clamp-2">{s.title}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 
 function BottomNav() {
   const items = [
@@ -101,6 +121,22 @@ function BottomNav() {
   )
 }
 
+function Player({ song }) {
+  if (!song) return null;
+
+  return (
+    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 w-[95%] max-w-4xl bg-gray-800/50 backdrop-blur-lg rounded-lg p-4 shadow-lg flex items-center gap-4">
+      <img src={song.coverImage} alt={song.title} className="w-16 h-16 rounded-md object-cover" />
+      <div className="flex-1">
+        <p className="font-semibold text-white">{song.title}</p>
+        <p className="text-sm text-gray-300">{song.artist}</p>
+      </div>
+      <audio controls autoPlay src={song.previewUrl} className="w-full max-w-xs">
+        Your browser does not support the audio element.
+      </audio>
+    </div>
+  );
+}
 
 export default function App() {
   const api = useApi()
