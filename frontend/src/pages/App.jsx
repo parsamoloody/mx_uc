@@ -77,6 +77,31 @@ function SearchBar({ value, onChange, onSearch }) {
   )
 }
 
+
+function BottomNav() {
+  const items = [
+    { icon: Icon.Home, label: 'Home' },
+    { icon: Icon.Music, label: 'Music' },
+    { icon: Icon.Heart, label: 'Favorites' },
+    { icon: Icon.User, label: 'Profile' },
+  ]
+  return (
+    <div className="fixed left-0 right-0 bottom-3">
+      <div className="mx-auto w-[92%] glass rounded-[24px] shadow-glow">
+        <div className="flex items-center justify-around py-3">
+          {items.map(({ icon: I, label }) => (
+            <button key={label} className="flex flex-col items-center gap-1 text-white/70 hover:text-white">
+              <I className="w-5 h-5"/>
+              <span className="text-[10px]">{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
 export default function App() {
   const api = useApi()
   const [recent, setRecent] = useState([])
