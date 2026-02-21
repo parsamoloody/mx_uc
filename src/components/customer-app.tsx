@@ -204,7 +204,7 @@ function RecommendedList({
   return (
     <div className="mt-6">
       <h3 className="px-5 text-lg font-semibold">Recommend for you</h3>
-      <div className="mt-3 ml-2 flex flex-col gap-3 pr-16">
+      <div className="mt-3 ml-2 flex flex-col gap-3 pr-3">
         {/* card Music */}
         {songs.map((song) => (
           <motion.div
@@ -212,7 +212,7 @@ function RecommendedList({
             whileHover={{ scale: 1.01 }}
             className="glass flex items-center gap-3 rounded-2xl bg-[rgba(17,16,33,0.6)] p-0.8"
           >
-            <img src={song.coverImage} className="h-12 w-12 rounded-xl object-cover" alt="cover" onClick={() => onPlay(song)} />
+            <img src={song.coverImage} className="h-12 w-12 ml-2 rounded-xl object-cover" alt="cover" onClick={() => onPlay(song)} />
             <div className="min-w-0 flex-1 cursor-pointer" onClick={() => onPlay(song)}>
               <p className="truncate text-sm font-medium">{song.title}</p>
               <p className="truncate text-xs text-white/60">{song.artist}</p>
@@ -221,7 +221,7 @@ function RecommendedList({
             </div>
             <button
               onClick={() => onOrder(song)}
-              className="rounded-lg bg-[#6b5cff]/20 px-3 py-2 text-xs text-violet-300 transition hover:bg-[#6b5cff]/30 hover:shadow-[0_10px_40px_rgba(107,92,255,0.35)]"
+              className="rounded-lg bg-[#6b5cff]/20 px-3 py-2 mr-2 text-xs text-violet-300 transition hover:bg-[#6b5cff]/30 hover:shadow-[0_10px_40px_rgba(107,92,255,0.35)]"
             >
               Order Song
             </button>
