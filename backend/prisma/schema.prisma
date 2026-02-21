@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MembershipType {
+  Gold
+  Silver
+  Bronze
+  Guest
+}
+
+enum UserRole {
+  customer
+  owner
+}
+
+enum SongSource {
+  local
+  deezer
+  itunes
+}
+
+enum OrderStatus {
+  queued
+  playing
+  completed
+}
+
+model User {
+  id             String         @id @default(cuid())
+  name           String
+  membershipType MembershipType @default(Guest)
+  avatar         String         @default("")
+  role           UserRole       @default(customer)
+  orders         Order[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([role])
+}
+
+model Song {
+  id            String     @id @default(cuid())
+  title         String
+  artist        String
+  album         String     @default("")
+  coverImage    String
+  category      String     @default("general")
+  playCount     Int        @default(0)
+  lastPlayed    DateTime?
+  previewUrl    String     @default("")
+  source        SongSource @default(local)
+  deezerId      Int?       @unique
+  itunesTrackId Int?       @unique
+  orders        Order[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([title])
+  @@index([artist])
+  @@index([album])
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  userId        String
+  songId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  song          Song        @relation(fields: [songId], references: [id], onDelete: Restrict)
+  status        OrderStatus @default(queued)
+  queuePosition Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([status, queuePosition, createdAt])
+  @@index([userId])
+  @@index([songId])
+}
