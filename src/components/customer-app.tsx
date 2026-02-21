@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { SVGProps } from "react";
 import { SongDTO } from "@/modules/songs/types";
 import { UserDTO } from "@/modules/users/types";
+import CustomAudioPlayer from "./custom-audio-player";
 
 type ApiResponse<T> = {
   success: boolean;
@@ -204,16 +205,18 @@ function RecommendedList({
     <div className="mt-6">
       <h3 className="px-5 text-lg font-semibold">Recommend for you</h3>
       <div className="mt-3 ml-2 flex flex-col gap-3 pr-16">
+        {/* card Music */}
         {songs.map((song) => (
           <motion.div
             key={song._id}
             whileHover={{ scale: 1.01 }}
-            className="glass flex items-center gap-3 rounded-2xl bg-[rgba(17,16,33,0.6)] p-2"
+            className="glass flex items-center gap-3 rounded-2xl bg-[rgba(17,16,33,0.6)] p-0.8"
           >
             <img src={song.coverImage} className="h-12 w-12 rounded-xl object-cover" alt="cover" onClick={() => onPlay(song)} />
             <div className="min-w-0 flex-1 cursor-pointer" onClick={() => onPlay(song)}>
               <p className="truncate text-sm font-medium">{song.title}</p>
               <p className="truncate text-xs text-white/60">{song.artist}</p>
+              {/* song played how many times ? */}
               <p className="text-[11px] text-white/40">{Intl.NumberFormat().format(song.playCount || 0)} / plays</p>
             </div>
             <button
@@ -256,16 +259,18 @@ function Player({ song }: { song: SongDTO | null }) {
   if (!song) return null;
 
   return (
-    <div className="fixed bottom-20 left-1/2 flex w-[95%] max-w-4xl -translate-x-1/2 items-center gap-4 rounded-lg bg-gray-800/50 p-4 shadow-lg backdrop-blur-lg">
-      <img src={song.coverImage} alt={song.title} className="h-16 w-16 rounded-md object-cover" />
-      <div className="flex-1">
-        <p className="font-semibold text-white">{song.title}</p>
-        <p className="text-sm text-gray-300">{song.artist}</p>
+    <div className="fixed bottom-20 left-1/2 flex w-[95%] max-w-4xl -translate-x-1/2 items-center gap-4 rounded-lg bg-gray-800/50 p-2 shadow-lg backdrop-blur-lg">
+      <img src={song.coverImage} alt={song.title} className="h-12 w-12 rounded-md object-cover" />
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-white truncate">{song.title}</p>
+        <p className="text-sm text-gray-300 truncate">{song.artist}</p>
       </div>
       {song.previewUrl ? (
-        <audio controls autoPlay src={song.previewUrl} className="w-full max-w-xs">
-          Your browser does not support the audio element.
-        </audio>
+        <CustomAudioPlayer 
+          src={song.previewUrl} 
+          title={song.title}
+          artist={song.artist}
+        />
       ) : (
         <span className="text-xs text-white/50">No preview</span>
       )}
