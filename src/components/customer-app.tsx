@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { SVGProps } from "react";
 import { SongDTO } from "@/modules/songs/types";
 import { UserDTO } from "@/modules/users/types";
+import { apiUrl } from "@/lib/api-client";
 import CustomAudioPlayer from "./custom-audio-player";
 
 type ApiResponse<T> = {
@@ -303,9 +304,9 @@ export function CustomerApp() {
   useEffect(() => {
     async function load() {
       const [recentRes, recommendedRes, userRes] = await Promise.all([
-        fetch("/api/songs/recent?limit=10", { cache: "no-store" }),
-        fetch("/api/songs/recommended?limit=10", { cache: "no-store" }),
-        fetch("/api/users/demo?role=customer", { cache: "no-store" }),
+        fetch(apiUrl("/api/songs/recent?limit=10"), { cache: "no-store" }),
+        fetch(apiUrl("/api/songs/recommended?limit=10"), { cache: "no-store" }),
+        fetch(apiUrl("/api/users/demo?role=customer"), { cache: "no-store" }),
       ]);
 
       const recentJson = (await recentRes.json()) as ApiResponse<SongDTO[]>;
@@ -333,7 +334,7 @@ export function CustomerApp() {
     }
     setIsSearching(true);
     try {
-      const res = await fetch(`/api/songs/search?q=${encodeURIComponent(query)}&limit=25`, {
+      const res = await fetch(apiUrl(`/api/songs/search?q=${encodeURIComponent(query)}&limit=25`), {
         cache: "no-store",
       });
       const payload = (await res.json()) as ApiResponse<SongDTO[]>;
@@ -345,7 +346,7 @@ export function CustomerApp() {
 
   async function handlePlay(song: SongDTO) {
     setCurrentSong(song);
-    await fetch(`/api/songs/${song._id}/play`, {
+    await fetch(apiUrl(`/api/songs/${song._id}/play`), {
       method: "POST",
     }).catch(() => null);
   }
@@ -356,7 +357,7 @@ export function CustomerApp() {
       return;
     }
     try {
-      const res = await fetch("/api/orders", {
+      const res = await fetch(apiUrl("/api/orders"), {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ userId: user._id, songId: song._id }),
