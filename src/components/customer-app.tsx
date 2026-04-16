@@ -7,6 +7,7 @@ import { SongDTO } from "@/modules/songs/types";
 import { UserDTO } from "@/modules/users/types";
 import { apiUrl } from "@/lib/api-client";
 import CustomAudioPlayer from "./custom-audio-player";
+import { CustomerBottomNav } from "./customer-bottom-nav";
 
 type ApiResponse<T> = {
   success: boolean;
@@ -101,7 +102,7 @@ function TopBar({ user }: { user: UserDTO | null }) {
   );
 }
 
-function SearchBar({
+export function  SearchBar({
   value,
   onChange,
   onSearch,
@@ -228,29 +229,6 @@ function RecommendedList({
             </button>
           </motion.div>
         ))}
-      </div>
-    </div>
-  );
-}
-
-function BottomNav() {
-  const items = [
-    { icon: Icon.Home, label: "Home" },
-    { icon: Icon.Music, label: "Music" },
-    { icon: Icon.Heart, label: "Favorites" },
-    { icon: Icon.User, label: "Profile" },
-  ];
-  return (
-    <div className="fixed bottom-3 left-0 right-0">
-      <div className="glass mx-auto w-[92%] rounded-[24px] shadow-[0_10px_40px_rgba(107,92,255,0.35)]">
-        <div className="flex items-center justify-around py-3">
-          {items.map(({ icon: I, label }) => (
-            <button key={label} className="flex flex-col items-center gap-1 text-white/70 hover:text-white">
-              <I className="h-5 w-5" />
-              <span className="text-[10px]">{label}</span>
-            </button>
-          ))}
-        </div>
       </div>
     </div>
   );
@@ -388,7 +366,7 @@ export function CustomerApp() {
         </>
       )}
       <Player song={currentSong} />
-      <BottomNav />
+      <CustomerBottomNav />
       {toast ? (
         <motion.div
           initial={{ y: 60, opacity: 0 }}
