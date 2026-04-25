@@ -57,3 +57,22 @@ export async function reorderQueuedOrders(orderedIds: string[]) {
 
   await Promise.all(updates);
 }
+
+export async function deleteOrderById(orderId: string) {
+  await connectToDatabase();
+  return OrderModel.findByIdAndDelete(orderId).lean();
+}
+
+export async function normalizeQueuedOrderPositions() {
+  await connectToDatabase();
+  const queuedOrders = await OrderModel.find({ status: "queued" })
+    .sort({ queuePosition: 1, createdAt: 1 })
+    .select({ _id: 1 })
+    .lean();
+
+  const updates = queuedOrders.map((order, index) =>
+    OrderModel.updateOne({ _id: order._id }, { $set: { queuePosition: index + 1 } }),
+  );
+
+  await Promise.all(updates);
+}

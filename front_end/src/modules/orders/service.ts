@@ -4,9 +4,11 @@ import { connectToDatabase } from "@/lib/db";
 import { toOrderDTO } from "@/modules/orders/mappers";
 import {
   createOrder,
+  deleteOrderById,
   getNextQueuePosition,
   getOrderById,
   listOrders,
+  normalizeQueuedOrderPositions,
   reorderQueuedOrders,
   updateOrderStatus,
 } from "@/modules/orders/repository";
@@ -43,4 +45,17 @@ export async function setOrderStatus(orderId: string, status: OrderStatus): Prom
 
 export async function reorderQueue(orderedIds: string[]): Promise<void> {
   await reorderQueuedOrders(orderedIds);
+}
+
+export async function deleteOrder(orderId: string): Promise<boolean> {
+  const deleted = await deleteOrderById(orderId);
+  if (!deleted) {
+    return false;
+  }
+
+  if (deleted.status === "queued") {
+    await normalizeQueuedOrderPositions();
+  }
+
+  return true;
 }

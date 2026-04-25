@@ -1,48 +1,45 @@
-import { NestFactory } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { AppLogger } from './common/logger/app.logger';
-import { AppModule } from './app.module';
+import { ValidationPipe } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { NestFactory } from "@nestjs/core";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
+import { ResponseEnvelopeInterceptor } from "./common/interceptors/response-envelope.interceptor";
+import { AppLogger } from "./common/logger/app.logger";
+import { appValidationPipe } from "./common/pipes/validation.pipe";
+import { PrismaService } from "./prisma/prisma.service";
+import { AppModule } from "./app.module";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    logger: new AppLogger(),
-  });
-  
-  const configService = app.get(ConfigService);
-  const port = configService.get<number>('PORT') || 3000;
-  const nodeEnv = configService.get<string>('NODE_ENV') || 'development';
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const logger = app.get(AppLogger);
+  app.useLogger(logger);
 
-  // Enable CORS
+  const config = app.get(ConfigService);
+  const frontendOrigin = config.get<string>("FRONTEND_ORIGIN") ?? "http://localhost:3000";
+  const port = config.get<number>("PORT") ?? 4001;
+
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: [frontendOrigin],
     credentials: true,
   });
 
-  // Global exception filter
+  app.useGlobalPipes(appValidationPipe as ValidationPipe);
+  app.useGlobalInterceptors(new ResponseEnvelopeInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Swagger documentation
-  if (nodeEnv !== 'production') {
-    const config = new DocumentBuilder()
-      .setTitle('Riffus API')
-      .setDescription('Listen what you want, when you want')
-      .setVersion('1.0')
-      .addBearerAuth()
-      .build();
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle("Riffus Backend API")
+    .setDescription("Independent modular-monolith Nest backend for Riffus")
+    .setVersion("1.0.0")
+    .build();
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup("docs", app, document);
 
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document);
-  }
+  const prisma = app.get(PrismaService);
+  await prisma.enableShutdownHooks(app);
 
-  await app.listen(port, () => {
-    console.log(`🚀 Server running on http://localhost:${port}`);
-    console.log(`📚 Swagger docs: http://localhost:${port}/api/docs`);
-  });
+  await app.listen(port);
+  logger.log(`Riffus backend listening on http://localhost:${port}`, "Bootstrap");
 }
 
-bootstrap().catch((err) => {
-  console.error('Failed to start application:', err);
-  process.exit(1);
-});
+bootstrap();

@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import type { SVGProps } from "react";
 import { SongDTO } from "@/modules/songs/types";
 import { UserDTO } from "@/modules/users/types";
+import { apiUrl } from "@/lib/api-client";
 import CustomAudioPlayer from "./custom-audio-player";
+import { CustomerBottomNav } from "./customer-bottom-nav";
 
 type ApiResponse<T> = {
   success: boolean;
@@ -100,7 +102,7 @@ function TopBar({ user }: { user: UserDTO | null }) {
   );
 }
 
-function SearchBar({
+export function  SearchBar({
   value,
   onChange,
   onSearch,
@@ -232,29 +234,6 @@ function RecommendedList({
   );
 }
 
-function BottomNav() {
-  const items = [
-    { icon: Icon.Home, label: "Home" },
-    { icon: Icon.Music, label: "Music" },
-    { icon: Icon.Heart, label: "Favorites" },
-    { icon: Icon.User, label: "Profile" },
-  ];
-  return (
-    <div className="fixed bottom-3 left-0 right-0">
-      <div className="glass mx-auto w-[92%] rounded-[24px] shadow-[0_10px_40px_rgba(107,92,255,0.35)]">
-        <div className="flex items-center justify-around py-3">
-          {items.map(({ icon: I, label }) => (
-            <button key={label} className="flex flex-col items-center gap-1 text-white/70 hover:text-white">
-              <I className="h-5 w-5" />
-              <span className="text-[10px]">{label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function Player({ song }: { song: SongDTO | null }) {
   if (!song) return null;
 
@@ -303,9 +282,9 @@ export function CustomerApp() {
   useEffect(() => {
     async function load() {
       const [recentRes, recommendedRes, userRes] = await Promise.all([
-        fetch("/api/songs/recent?limit=10", { cache: "no-store" }),
-        fetch("/api/songs/recommended?limit=10", { cache: "no-store" }),
-        fetch("/api/users/demo?role=customer", { cache: "no-store" }),
+        fetch(apiUrl("/api/songs/recent?limit=10"), { cache: "no-store" }),
+        fetch(apiUrl("/api/songs/recommended?limit=10"), { cache: "no-store" }),
+        fetch(apiUrl("/api/users/demo?role=customer"), { cache: "no-store" }),
       ]);
 
       const recentJson = (await recentRes.json()) as ApiResponse<SongDTO[]>;
@@ -333,7 +312,7 @@ export function CustomerApp() {
     }
     setIsSearching(true);
     try {
-      const res = await fetch(`/api/songs/search?q=${encodeURIComponent(query)}&limit=25`, {
+      const res = await fetch(apiUrl(`/api/songs/search?q=${encodeURIComponent(query)}&limit=25`), {
         cache: "no-store",
       });
       const payload = (await res.json()) as ApiResponse<SongDTO[]>;
@@ -345,7 +324,7 @@ export function CustomerApp() {
 
   async function handlePlay(song: SongDTO) {
     setCurrentSong(song);
-    await fetch(`/api/songs/${song._id}/play`, {
+    await fetch(apiUrl(`/api/songs/${song._id}/play`), {
       method: "POST",
     }).catch(() => null);
   }
@@ -356,7 +335,7 @@ export function CustomerApp() {
       return;
     }
     try {
-      const res = await fetch("/api/orders", {
+      const res = await fetch(apiUrl("/api/orders"), {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ userId: user._id, songId: song._id }),
@@ -387,7 +366,7 @@ export function CustomerApp() {
         </>
       )}
       <Player song={currentSong} />
-      <BottomNav />
+      <CustomerBottomNav />
       {toast ? (
         <motion.div
           initial={{ y: 60, opacity: 0 }}
